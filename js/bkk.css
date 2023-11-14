@@ -1,0 +1,680 @@
+@import url("https://fonts.googleapis.com/css?family=Raleway:800|Merriweather+Sans");
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+:root {
+  --ui-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 4px 5px 0 rgba(0, 0, 0, 0.06), 0 1px 10px 0 rgba(0, 0, 0, 0.08);
+  fill: rgba(0, 0, 0, 0.54);
+  --ui-shadow-border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Fredoka One", sans-serif;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2em;
+
+  color: #2a3747;
+}
+
+
+h1 {
+  font-size: 55px;
+}
+
+
+h2 {
+  font-size: 46px;
+}
+
+h3 {
+  font-size: 40px;
+}
+a {
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+  display: contents;
+/*  color: gray;*/
+  /*font-size: 0.8em;*/
+
+}
+
+
+a.hover {
+    text-decoration: underline;
+}
+
+a.hover:hover {
+    text-decoration: underline;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+.View {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -10%);  
+  width: 90vw;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  padding-left: 1.5vw;
+  padding-right: 1.5vw;
+  padding-top:  auto;
+  padding-bottom:  auto;
+  background-size: cover;
+  font-family: "Merriweather Sans", sans-serif;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;  
+}
+
+.Banner {
+  display: flex; 
+  flex-direction: row;
+  flex-wrap: wrap;  
+  justify-content: center;
+  align-items: center;
+  border-radius: 1vw;
+  /*overflow: visible;*/
+  width: 100%;
+  background: white;
+  padding: 2vh;
+  margin-top:  2vh;
+  font-family: "Fredoka One";
+  font-size: 8vw;
+  /*border-bottom: var(--ui-shadow-border);*/
+  /*box-shadow: var(--ui-shadow);*/
+  text-align: center;"
+    font-family: "Fredoka One", sans-serif;
+  padding: 0;
+  margin: 0;
+  clear: both;
+  color: #2a3747;
+
+}
+
+
+
+.Intro {
+  display: inline-block;
+  /*width: fit-content;*/
+  width: 90vw;
+  background: white;
+  padding-top: 2vh;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0;
+  border-bottom: var(--ui-shadow-border);
+  box-shadow: var(--ui-shadow);
+
+
+}
+
+.Intro > .Title {
+  padding-bottom: 2vh;
+}
+
+.Intro > .Details {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5em;
+}
+
+.IntroText ul > li{
+    padding-bottom:  14px;
+}
+
+.IntroText ul > li:nth-child(2n+2) h3{
+    color: #f3cb19ff;
+    -webkit-text-stroke: 0.1px black;
+}
+
+.IntroText {
+  float: left;
+  width: 60%;
+}
+
+.IntroText h3 {
+  font-size: 4.5vw;
+}
+
+
+
+.IntroPic {
+  float: right;
+  width: 40%;
+}
+
+.Impact {
+  text-align: center; 
+  clear: both;
+  color: #f64f8cff;
+  -webkit-text-stroke: 0.1px black;
+  font-size: 8vw;
+}
+
+
+@media screen and (min-width: 760px) {
+  .Impact {
+     font-size: 64px;
+  }
+  .IntroText h3 {
+     font-size: 36px;
+  }
+  .Banner {
+     font-size: 64px;
+  }
+}
+
+
+
+.Menu {
+
+  background: white;
+  padding: 2vh;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2vh;
+
+
+}
+
+.Menu ul {
+  list-style-type: none;
+}
+
+.Menu ul > li{
+    padding:  14px;
+    border-bottom: var(--ui-shadow-border);
+    /*margin-botto*/m: 10px;
+    box-shadow: var(--ui-shadow);
+    font-family: "Raleway", sans-serif;
+    font-size: 50px;
+}
+
+
+
+.slider-width100pc
+{
+    width: 100%;
+}
+
+#bkkLeft {
+  white-space:nowrap;
+}
+
+#bkkRight {
+  flex-grow: 100
+}
+
+.clear {
+  clear: both;
+}
+
+#linearNav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; 
+  float:  left;
+  clear: both;
+  height: 19%;
+  width: 100%;
+}
+
+.navarrowleft {
+  float: left;
+  margin: 0;
+}
+
+.navarrowleft:hover{
+  cursor: pointer;
+}
+
+.navarrowright {
+  float: right;
+  margin: 0;
+}
+.navarrowright:hover{
+  cursor: pointer;
+}
+
+#narrativeLeft{
+  margin-left:  1vw;
+  margin-bottom:  2vh;
+
+}
+#narrativeLeft{
+  margin-top: 1vh;
+  margin-right:  1vw;
+  margin-bottom:  2vh;  
+}
+
+.answer {
+  font-family: "Fredoka One", sans-serif;
+  font-size: 3rem;
+}
+
+.answer a {
+  color: #4fb4f6ff;
+}
+
+.htmlResource {
+  visibility: hidden;
+  display: none;
+}
+
+#circContainer {
+
+  position:relative;
+  width:  auto;
+}
+
+#ctrlContainer {
+  display: inline-block;
+  width: auto%;
+  margin-top: 0px;
+}
+
+.introContainer {
+  display: none;
+  width: auto%;
+  margin-top: 0px;  
+}
+
+.introContainer_hidden {
+  display: none;  
+  width: auto%;
+  margin-top: 0px;
+}
+
+
+
+
+#create_menu{
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 8px;
+  margin-top: 0px;
+  margin-bottom:20px;
+  width:  50vw;
+  min-width: 450px;
+/*  min-height: 425px;*/
+  /*border: #34daff 1px solid; */
+  box-shadow: 0 1px 8px 0 #34daff3d, 0 1px 8px 0 #34daff3d;
+  display: none;
+}
+
+
+
+#name_menu{
+  display: none;
+}
+
+#describe_menu{
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 8px;
+  margin-top: 0px;
+  /*display: none;*/
+  min-width:  375px;  
+  min-height: 425px;
+  box-shadow: 0 1px 8px 0 #34daff3d, 0 1px 8px 0 #34daff3d;
+}
+
+#save_menu{
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 8px;
+  margin-top: 0px;
+  /*display: none;*/
+  min-width:  375px;  
+  min-height: 425px;
+  box-shadow: 0 1px 8px 0 #34daff3d, 0 1px 8px 0 #34daff3d;
+}
+
+#load_menu{
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 8px;
+  margin-top: 0px;
+  /*display: none;*/
+  min-width:  375px;  
+  min-height: 425px;
+  box-shadow: 0 1px 8px 0 #34daff3d, 0 1px 8px 0 #34daff3d;
+}
+
+
+.menu_displays{
+  display: table-caption;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.menu_hidden{
+  display: none;
+}
+
+#interfaceContainer {
+  background:  white;
+  display: block;
+  clear:  both;
+  width: fit-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  
+  padding: 10px;
+  border-radius: 10px;
+  border: black 2px solid;
+
+}
+
+#afterBKK{
+  display:  block;
+  clear: both;
+}
+
+#hidden_svg_canvas {
+  display:none;
+}
+
+#bkkmood{
+  border: black 2px solid;
+  font-family:   font-family: "Merriweather Sans", sans-serif;
+  font-size: 18px;
+}
+
+.closeBKK {
+
+}
+
+button.CloseBKK {
+  z-index: 100;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 5;
+  font-size: 30px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;  
+  border: none;
+  margin: 0px;
+  /*color: red;*/
+  background-color: transparent;
+}
+
+button.day{
+  background: transparent;
+}
+
+.sketchContainer {
+}
+
+
+#describe_help {
+  background:  white;
+  clear:  both;
+  width: fit-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  
+  padding: 10px;
+  border-radius: 10px;
+  border: black 2px solid;
+  overflow: auto;
+}
+
+.overlay {
+  background:  white;
+  clear:  both;
+  width: fit-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  
+  padding: 10px;
+  border-radius: 10px;
+  border: black 2px solid;
+  overflow: auto;
+  opacity: 95%;
+}
+
+
+
+/*SLIDERS   */
+
+.bkk_slidewrap{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  padding-bottom: 6px;
+}
+
+
+.bkkslide {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  background: #34daff;
+  outline: none;
+  border: 2px solid black;
+  border-radius: 6px;
+  margin-left: 6px  ;
+  margin-right: 6px  ;
+  padding-top: 0px  ;
+}
+
+.bkkAll {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* for chrome/safari */
+.bkkslide::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 35px;
+  background: #34daff;
+  cursor: pointer;
+  border: 2px solid black;
+  border-radius: 6px;
+}
+
+
+/* for firefox */
+.bkkslide::-moz-range-thumb {
+  width: 12px;
+  height: 35px;
+  background: #34daff;
+  cursor: pointer;
+  border: 2px solid black;
+  border-radius: 6px;
+}
+
+#colourPicker{
+    border-radius: 100%;
+    height: 50px;
+    width: 50px;
+    border: 2px solid black;
+    outline: none;
+    -webkit-appearance: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#colourPicker::-webkit-color-swatch-wrapper {
+    padding: 0; 
+}
+#colourPicker::-webkit-color-swatch {
+    border: none;
+    border-radius: 100%;
+}
+
+
+.ctrl_nav {
+  /*margin-bottom:  10px;*/
+}
+
+#mainNav {
+  
+}
+
+
+button{
+  font-family: "Merriweather Sans", sans-serif;  
+  border: #34daff3d 0.5px solid;
+  box-shadow: 0 1px 8px 0 #34daff3d;
+  padding: 5px 15px 5px 5px;
+  font-size: 20px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;  
+  /*margin: 2px;*/
+  background-color: #fff;
+  color: #555;
+  border-radius:  10px 10px 0px 0px;
+  z-Index:  5;
+}
+
+.nav-select {
+  border: #34daff3d 1px solid;
+  box-shadow: 0 1px 8px 0 #34daff3d;
+  padding: 5px 15px 5px 5px;
+  font-size: 20px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;  
+  /*margin: 2px;*/
+  background-color: #34daff3d;
+  /*color: #555;*/
+  /*font-weight:  bold;*/
+  border-radius:  10px 10px 0px 0px;
+  z-Index:  -10;  
+}
+
+.nav-highlight {
+  border: #34daff3d 1px solid;
+  box-shadow: 0 1px 8px 0 #34daff3d;
+  padding: 5px 15px 5px 5px;
+  font-size: 20px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;  
+  /*margin: 2px;*/
+  background-color: #fff53473;
+  /*color: #555;*/
+  /*font-weight:  bold;*/
+  border-radius:  10px 10px 0px 0px;
+  z-Index:  -10;  
+}
+
+
+
+.emptyslot {
+  width: 90px;
+  height: 90px;
+  border-style: solid;
+  border-color: black;
+  border-width: 2px;
+  text-align: center;
+  float: left;
+  margin: 0;
+}
+
+
+
+
+/* NAMING */
+label {margin: 0; padding: 0}
+
+#cons1 {
+  width: auto;
+  padding: 0;
+  margin: 0;  
+  height: auto;
+  display: inline-block;
+}
+
+#vow1, #cons2, #vow2, #cons3, #vow3{
+  display:  none;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+}
+
+
+select {
+  font-family:  "Fredoka One", sans-serif;
+  font-size:  60px;
+  border: 0;
+  background-color: #34daff2b;
+  appearance: none;  
+  cursor: pointer;  
+  text-align-last:center; 
+}
+
+.name {
+    display: flex;
+    flex-direction: row;
+}
+
+.myName {
+  font-size: 1.5rem;
+}
+
+#introNameEntryNext {
+  display:  inline-block;
+  visibility: hidden;
+}
+
+.jspsych-content {
+    max-width: 1000px;
+    text-align: center;
+    width: 60vw;
+    margin: auto;
+    min-width: 600px;
+}
+
+.consent1 {
+  width:60vw;
+  min-width:600px;
+  max-width:1000px;
+}

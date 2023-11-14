@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#000000" />
+    <title>Explore! | SENSORY EXPLORER</title>
+    <link rel="stylesheet" href="./bkk.css" />
+    <script src="./js/p5/p5.js"></script>
+    <script src="https://unpkg.com/p5.js-svg@1.1.1"></script>
+    <script src="./js/bkk.js"></script>
+    <script src="./js/circumplex.js"></script>
+    <link rel="import" href="calendar.html" id="calendar" />
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      var bkk = new BKK();
+      var circ = new Circumplex();
+      var pinkTromboneElement;
+      var audioCtx;
+      var nameParts = [];
+      var bkkName = "";
+      var bkkPhon = "";
+      var circumplexX = null;
+      var circumplexY = null;
+      var userBKKs = null;
+      var bkksize = "big";
+
+      window.onresize = resizeBKK;
+
+      function resizeBKK() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+
+        if (bkksize == "big" && (w < 875 || h < 600)) {
+          bkk.setBKKSize(300);
+          bkksize = "small";
+        }
+        if (bkksize == "small" && w >= 875 && h >= 600) {
+          bkk.setBKKSize(400);
+          bkksize = "big";
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <span class="Banner"
+      ><span
+        style="
+          -webkit-text-stroke: 2.5px black;
+          display: inline;
+          color: #f3cb19ff;
+        "
+        >Sensory</span
+      ><span
+        style="
+          -webkit-text-stroke: 2.5px black;
+          display: inline;
+          color: #f64f8cff;
+        "
+        >Interaction</span
+      ><span
+        style="
+          -webkit-text-stroke: 2.5px black;
+          display: block;
+          color: #4fb4f6ff;
+        "
+        >Explorer</span
+      ></span
+    >
+    <div class="View">
+      <div class="main">
+        <div class="bkkAll">
+          <div class="bkkLeft" id="bkkLeft">
+            <div class="bkkContainer" id="bkkContainer"></div>
+            <span id="bkkLeftIntroText"></span>
+          </div>
+          <div style="margin-bottom: 20px; font-weight: bold">
+            Can you change me to match your feelings?
+          </div>
+          <div id="ctrlContainer">
+            <div class="menu_displays" id="create_menu">
+              <div class="bkk_slidewrap">
+                <img src="./img/ii_protrusion_a.png" width="40px" />
+                <input
+                  class="bkkslide"
+                  type="range"
+                  id="spikiness"
+                  min="0"
+                  max="255"
+                  value="127"
+                />
+                <img src="./img/ii_protrusion_b.png" width="40px" /><br />
+              </div>
+              <div class="bkk_slidewrap">
+                <img src="./img/ii_count_a.png" width="40px" />
+                <input
+                  class="bkkslide"
+                  type="range"
+                  id="complexity"
+                  min="0"
+                  max="255"
+                  value="127"
+                />
+                <img src="./img/ii_count_b.png" width="40px" /><br />
+              </div>
+              <div class="bkk_slidewrap">
+                <img src="./img/ii_mess_a.png" width="40px" />
+                <input
+                  class="bkkslide"
+                  type="range"
+                  id="noise"
+                  min="0"
+                  max="255"
+                  value="0"
+                />
+                <img src="./img/ii_mess_b.png" width="40px" />
+                <br />
+              </div>
+              <div class="bkk_slidewrap">
+                <img src="./img/ii_smooth_b.png" width="40px" />
+                <input
+                  class="bkkslide"
+                  type="range"
+                  id="smooth"
+                  min="0"
+                  max="255"
+                  value="127"
+                />
+                <img src="./img/ii_smooth_a.png" width="40px" />
+                <br />
+              </div>
+              <div class="bkk_slidewrap">
+                <img src="./img/ii_rotate_a.png" width="40px" />
+                <input
+                  class="bkkslide"
+                  type="range"
+                  id="move_amount"
+                  min="0"
+                  max="255"
+                  value="40"
+                />
+                <img src="./img/ii_rotate_b.png" width="40px" />
+                <br />
+              </div>
+              <div class="bkk_slidewrap">
+                <input
+                  class="field-radio"
+                  type="color"
+                  id="colourPicker"
+                  value="#f64f8c"
+                />
+                <br />
+              </div>
+              <div class="circContainer" id="circContainer"></div>
+              <span id="ControlIntroText"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="describe">
+        <div>how would you describe my mood?</div>
+        <div class="tooltip">
+          (Need some help?)
+          <div class="tooltip-text">
+            <div class="cir"><img src="img/Circumplex.jpg" alt="" /></div>
+            <p>
+              Here is a circular depiction of the similarities among multiple variables.
+              For example, a researcher studying emotions might focus on certain
+              core affects and create a circumplex representation of them, with
+              variables having opposite values or characteristics (i.e.,
+              tranquility–frenzy; sadness–enthusiasm; sluggishness–excitement)
+              displayed at opposite points on the circumplex, whereas variables
+              having highly similar characteristics are displayed adjacent to
+              one another on the circumplex. In other words, the similarity (and
+              correlation) between elements declines as the distance between
+              them on the circle increases.
+            </p>
+          </div>
+        </div>
+        <div>
+          <input
+            id="mood"
+            type="text"
+            size="10"
+            maxlength="60"
+            style="margin: 10px"
+          />
+        </div>
+        <div class="save"><button id="save">save</button></div>
+      </div>
+
+      <div id="svgcon"></div>
+    </div>
+  </body>
+
+  <script>
+    //  USE THIS TO SETUP RECORDING OF DATA
+
+    function circumplexClick() {
+      // This function will handle what happens when the circumplex is clicked
+      null;
+    }
+
+    function recordParameters() {
+      // write this function to get the data from the sliders and record it so you can analyse it later
+      controls = document.getElementById("controls");
+      spikeSlider = document.getElementById("spikiness");
+      complexitySlider = document.getElementById("complexity");
+      noiseSlider = document.getElementById("noise");
+      smoothSlider = document.getElementById("smooth");
+      moveSlider = document.getElementById("move_amount");
+      colourPicker = document.getElementById("colourPicker");
+      let uData = {};
+      uData["spikiness"] = spikeSlider.value;
+      uData["count"] = complexitySlider.value;
+      uData["noise"] = noiseSlider.value;
+      uData["smooth"] = smoothSlider.value;
+      uData["move"] = moveSlider.value;
+      // uData["bkkName"] = nameInput.value ;
+      uData["colour"] = colourPicker.value;
+      console.log(uData);
+      // colourPicker
+    }
+
+    circContainer = "circContainer";
+    function setupFormUpdate() {
+      bkk.set_form_update_event(recordParameters);
+    }
+
+    var bkkClass;
+    bkkClass = new BKK();
+    var bkk;
+    var draw_eyes = true;
+    var draw_outline = true;
+    bkk = bkkClass.runBKKExplore(setupFormUpdate, draw_eyes, draw_outline);
+
+    save = document.getElementById("save");
+    svggg = document.getElementById("svgcon");
+    mood = document.getElementById("mood");
+
+    save.onclick = function () {
+      var data = bkk.save_canvas_as_svg();
+      var moodValue = mood.value;
+      // 将图像数据保存到LocalStorage中
+      //localStorage.setItem('savedImage', data);
+
+      function getEventID() {
+        // 从URL中获取事件ID（这里假设使用URL参数传递eventID）
+        console.log(window.location.href);
+        const url = window.location.href;
+
+        // 定义一个正则表达式，用于匹配eventID参数值
+        const regex = /eventID=([^&#]+)/;
+
+        // 使用正则表达式匹配URL，并提取出eventID参数值
+        const match = url.match(regex);
+
+        // 如果匹配成功，获取提取的eventID参数值
+        if (match) {
+          const eventID = match[1];
+          //console.log('提取的eventID参数值：', eventID);
+          return eventID;
+        } else {
+          console.log("未找到eventID参数值或URL中未包含eventID参数。");
+        }
+      }
+
+      console.log(window.location.href);
+
+      var a = getEventID();
+      localStorage.setItem("idd", a);
+      console.log(a);
+      window.opener.postMessage(
+        {
+          type: "svgData",
+          eventID: getEventID(),
+          svgData: svgData,
+          moodValue: moodValue,
+        },
+        "*"
+      );
+      window.close();
+    };
+  </script>
+</html>

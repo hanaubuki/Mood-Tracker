@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+
+  <title>Clicking and selecting on resources - Demos | FullCalendar</title>
+
+  <link href="/docs/dist/demo-to-codepen.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <script src="./d.js"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+      font-size: 14px;
+    }
+
+
+    #calendar {
+      max-width: 1100px;
+      margin: 40px auto;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.8/index.global.min.js"></script>
+
+  <script src="/docs/dist/demo-to-codepen.js"></script>
+
+  <script>
+    var id = "0";
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var savedEvents = localStorage.getItem('eventsData');
+      var events = savedEvents ? JSON.parse(savedEvents) : [];
+
+      var calendarEl = document.getElementById("calendar");
+
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        themeSystem: 'bootstrap',
+        selectable: true,
+        initialView: "dayGridMonth",
+        headerToolbar: {
+          left: "prev,next today",
+          center: "title",
+          right: "timeGridWeek,timeGridDay",
+        },
+        events: events,
+
+        viewDidMount: function (info) {
+          var startTextElement = document.getElementById("start");
+          if (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay') {
+            startTextElement.textContent = 'Tap the current moment to record your mood!';
+          } else {
+            startTextElement.textContent = 'Click the button on the right to choose the view, and then start to record your mood!';
+          }
+        },
+
+        dateClick: function (info) {
+          if (calendar.view.type === 'dayGridMonth') {
+            // 在月视图下弹窗提示
+            alert("Please switch to the week or day grid to add mood!");
+          } else { //get current time
+            var date = new Date(info.dateStr);
+            //add the event
+            calendar.addEvent({
+              id: info.dateStr,
+              title: "Click here to track your mood!",
+              start: date,
+              defaultTimedEventDuration: "01:00:00",
+              extendedProps: {
+                svg: "Click here to track your mood!"
+              }
+            });
+          }
+        },
+
+        eventClick: function (info) {
+          const eventID = info.event.id;
+          window.open(`bkk.html?eventID=${eventID}`, "_blank");
+        },
+
+        eventMouseEnter: function (info) {
+          console.log(info.event.extendedProps.svg)
+          tippy(info.el, {
+            maxWidth: 500,
+            content: info.event.extendedProps.svg,
+            allowHTML: true,
+          });
+        },
+      });
+
+
+      window.addEventListener("message", function (e) {
+
+        const eventID = e.data.eventID;
+        const svgData = e.data.svgData;
+        const moodValue = e.data.moodValue
+
+        console.log(svgData)
+        console.log(moodValue)
+        eventSelected = calendar.getEventById(eventID)
+        console.log(eventSelected)
+        eventSelected.setProp('title', moodValue)
+        eventSelected.setExtendedProp('svg', svgData)
+        var updatedEvents = calendar.getEvents();
+
+        // 将事件数据保存到本地存储
+        localStorage.setItem('eventsData', JSON.stringify(updatedEvents));
+      });
+
+      calendar.render();
+    });
+  </script>
+</head>
+
+<body>
+
+  <div><span class="Banner"><span style="-webkit-text-stroke: 2.5px black; color:#f3cb19ff;">Sensory</span><span
+        style="-webkit-text-stroke: 2.5px black; color:#f64f8cff;">Interaction</span><span
+        style="-webkit-text-stroke: 2.5px black; color:#4fb4f6ff;">Explorer</span></span></div>
+  <h2 id="start">Click the button on the right to choose the view, and then start to record your mood!</h2>
+  <div id="calendar">
+
+    <!-- Cloudflare Pages Analytics -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "dc4641f860664c6e824b093274f50291"}'></script>
+    <!-- Cloudflare Pages Analytics -->
+</body>
+
+</html>

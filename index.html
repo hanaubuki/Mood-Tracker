@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- ORDER IS IMPORTANT. THESE MUST ALWAYS COME FIRST, IN THIS ORDER -->
+    <script src="./js/p5/p5.js"></script>
+    <script src="./js/circumplex.js"></script>
+    <script src="./js/bkk.js"></script>
+
+    <!-- Now the JsPsych specific stuff -->
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/jspsych/jspsych.js"></script>
+    <script src="./js/jspsych/plugin-instructions.js"></script>    
+    <script src="./js/jspsych/plugin-html-button-response.js"></script>
+    <script src="./js/jspsych/plugin-survey-text.js"></script>
+    <script src="./js/bkk-plugins/bkk-survey-text.js"></script>
+
+
+    <link rel="stylesheet" href="./js/jspsych/jspsych.css"></link>
+    <link rel="stylesheet" href="./js/bkk.css"></link>
+
+    <!-- OTHER FILES YOU MIGHT WANT TO EDIT -->
+    <script src="js/consent_etc.js"></script> <!-- defines the consent page and the demographic checks -->
+
+
+  </head>
+  <body></body>
+  <script>
+    // Stops the user pressing "back" which would wipe all data
+      function preventNavBack(){
+        history.pushState(null, null, document.URL);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, null, document.URL);
+            window.alert("the back button has been disabled for the duration of the experiment, as using the back button will break the experiment");
+        });
+      }
+      preventNavBack();
+
+
+      function randomString(){
+        return (Math.random() + 1).toString(36).substring(7);
+      }
+
+
+    var timeline=[];
+
+
+    var jsPsych = initJsPsych({
+      // HANDLE THE DATA AT THE END OF THE TRIAL
+      on_finish: function() {
+
+          // capture info from Prolific
+        var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+        var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+        var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+        if (typeof subject_id == 'undefined'){ 
+          subject_id = "nonProlific_" +randomString()
+          study_id = "nonProlific"
+          session_id = "session_id"
+        }
+
+
+        var interaction_data = jsPsych.data.getInteractionData();
+        var clicksAway = 0;
+        var exitFullscreen = false;
+        for(const id of interaction_data.trials){
+          if(id["event"]=="blur"){
+            clicksAway+=1;
+          }
+          if(id["event"]=="fullscreenexit"){
+            exitFullscreen = true;
+          }          
+        }
+
+        var demogdata = jsPsych.data.get()
+              .filter({easyName: 'demographics'})
+              .values()["0"]["response"];
+
+        var age = demogdata["Q0"];
+        var gender = demogdata["Q1"];
+        var country = demogdata["Q1"];
+
+
+        if (typeof age == 'undefined'){ age = "not given"}
+        if (typeof gender == 'undefined'){ gender = "not given"}
+        if (typeof country == 'undefined'){ country = "not given"}                  
+        
+        // var training_data = jsPsych.data.get().filter({trialCategory: 'oasis'});
+
+
+        jsPsych.data.addProperties({
+          subject_id: subject_id,
+          study_id: study_id,
+          session_id: session_id,
+          interaction_clicksAway: clicksAway,
+          interaction_exitFullscreen: exitFullscreen,
+          age: age,
+          gender: gender,
+          country: country
+        });
+
+        var bkk_data = jsPsych.data.get().filter([{trialCategory: 'bkk stimulus'},
+                                                          {trialCategory: 'calibration'}]);
+
+        // bkk_data.localSave('csv', jsPsych.randomization.randomID(32) + '.csv')
+        // jsPsych.data.displayData();
+        // bkk_data.displayData()
+
+        var postdata = bkk_data.json()
+
+        $.post('submit',{"content": postdata})
+        function cb(){
+          console.log("redirect")
+           window.location = "https://app.prolific.co/submissions/complete?cc=CUINYYFQ"
+        }
+        // Handle redirect back to prolific
+        setTimeout(cb,1000)
+
+       
+      }
+    });
+
+
+
+// OVERALL PARAMETERS (bypassed in testing mode)
+    var trial_time_lower_limit = 6.5 * 1000  // how long you have to stay on each BKK page
+    var intro_page_time = 50 * 1000  // how long you have to spend on the intro page
+    var force_circumplex_click = true;      // if true you have to click the circumplex before continuing
+
+//  SET TESTING MODE - REMOVES INTRO AND TIMING LIMITATIONS ----------------------------------------------
+    var testing = false;
+    var excludeIntro = false;    
+
+    if(testing){
+      trial_time_lower_limit = 0;
+      intro_page_time= 0;
+      force_circumplex_click = false;
+
+    }
+
+
+//  INTRODUCTION, Consent, Demographics -------------------------------------------------------------------
+
+
+    // THESE PAGES ARE DEFINED IN CONSENT_ETC.JS
+    var infoBlock = {
+      timeline: [startPage, consent_page],
+    }
+
+    //  COMMENT OUT THIS LINE FOR TESTING IF YOU WANT - IT WILL GET RID OF THE INTRO, CONSENT, and Demographics pages
+    if(!excludeIntro){
+      timeline.push(infoBlock)
+    }
+
+
+
+
+//  TRAINING  -----------------------------------------------------------------------------
+
+
+    trainingTimeline = []
+    var instructioncorrect= false
+
+
+    /* define a page for the incorrect response */
+    var error_screen = {
+      type: jsPsychHtmlButtonResponse,
+      timing_post_trial: 0,
+      choices: ['Click here to read the instructions again'],
+      on_trial_start: function() {setTimeout(function() {setDisplay("jspsych-btn","")}, 500)},
+      is_html: true,
+      data: { easyName: 'fail', taskType: jsPsych.timelineVariable('taskType')},      
+      stimulus: "You didn't click in the right area. Re-read the instructions and try again."
+    }
+
+    /* ...but push it to a conditional node that only shows it if the response was wrong */
+    var conditional_error = {
+      timeline: [error_screen],
+      conditional_function: function(data) {
+        return !instructioncorrect // skip if correct
+      }
+    }
+
+  
+    var training1 = { type: jsPsychBKKSurveyText, 
+        preamble: '<h1>Training Section</h1><p>In the experiment you will be shown various shapes and asked to record your emotional response to each shape. The next few pages will introduce how to record your response <b>you must read all of this page. The page is timed and you cannot move forward more quickly by not reading. </b> </p>' +
+
+
+                  '<p>To record your emotional response you will click on a graph like the one shown below - this is called <b>circumplex</b>. The top of the graph represents very high energy feelings, such as excited or alarmed. The bottom of the graph represents very low energy feelings, such as calm or bored. The centre represents neutral feelings. You can click anywhere from top to bottom to record more or less energetic feelings.</p>'+
+
+                  '<p> Similarly, the left side of the graph represents very negative feelings, such as gloomy or annoyed; and the right side represents very positive feelings, such as delighted or satisfied. Again, the centre represents neutral feelings, and you can click at any point which represents your feeling.</p>'+
+
+                  '<p>For each shape you should look at the shape and take some time to reflect on how it makes you feel. Then you should click on the place on the graph that represents how you feel.  </p>'  +
+
+                  '<p><b>Over the next few pages we will give some examples of using the circumplex. For each page, follow the instructions on where to click.</b> </p>'  +                  
+                  '<p>Click anywhere on the graph and then click submit to continue.</p>' +
+                  '<br>', 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: intro_page_time,
+        circ_hide: false, // hides the circumplex if true
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: [],      
+        data: {trialCategory: "training"}
+      } 
+      trainingTimeline.push(training1)
+
+
+
+
+    var tr_2 = []
+    var training2 = { type: jsPsychBKKSurveyText, 
+        data: {trialCategory: "training"},
+        preamble: '<center><img src="./img/happy_excited.jpg"></img></center><p> This image is of someone happy and excited. These kinds of feelings belong in the top right corner of the graph. They are very high energy (top), and very positive (right). Click cin the top right corner of the graph, and then click submit.</p>', 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: trial_time_lower_limit,
+        circ_hide: false,
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: [],
+      on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 1000)},
+      on_finish: function(data) {
+        console.log(data.valence, data.arousal)
+          instructioncorrect = false; 
+          if( data.valence >  0.6 & data.arousal > 0.6) {
+            action = false;
+            instructioncorrect = true;
+          }
+        }
+      } 
+
+      tr_2.push(training2)
+      tr_2.push(conditional_error)
+    /* finally, add the entirety of this introductory section to a loop node ... */
+    var tr_loop_2 = {
+      timeline: tr_2,
+      loop_function: function(data) {return !instructioncorrect }
+    }
+    trainingTimeline.push(tr_loop_2) // ... and add that to the timeline
+
+
+
+
+    var tr_3 = []
+    var training3 = { type: jsPsychBKKSurveyText, 
+        data: {trialCategory: "training"},
+        preamble: '<center><img src="./img/sad.jpg"></img></center><p> Great. Now this image is of someone very sad or depressed. These kinds of feelings belong in the bottom left corner of the graph. They are very low energy (bottom), and very negative (left). Click in the bottom left corner of the graph, and then click submit.</p>', 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: trial_time_lower_limit,
+        circ_hide: false,
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: [],
+      on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 1000)},
+      on_finish: function(data) {
+        console.log(data.valence, data.arousal)
+          instructioncorrect = false; 
+          if( data.valence <  -0.6 & data.arousal < -0.6) {
+            action = false;
+            instructioncorrect = true;
+          }
+        }
+      } 
+      tr_3.push(training3)
+      tr_3.push(conditional_error)
+    /* finally, add the entirety of this introductory section to a loop node ... */
+    var tr_loop_3 = {
+      timeline: tr_3,
+      loop_function: function(data) {return !instructioncorrect }
+    }
+    trainingTimeline.push(tr_loop_3) // ... and add that to the timeline
+
+
+    var tr_4 = []
+    var training4 = { type: jsPsychBKKSurveyText, 
+        data: {trialCategory: "training"},
+        preamble: '<center><img src="./img/relaxed.jpg"></img></center><p> This image is of someone feeling relaxed and cozy. These kinds of feelings belong in the bottom right corner of the graph. They are very low energy (bottom), and very positive (right). Click in the bottom right corner of the graph, and then click submit.</p>', 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: trial_time_lower_limit,
+        circ_hide: false,
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: [],
+      on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 1000)},
+      on_finish: function(data) {
+        console.log(data.valence, data.arousal)
+          instructioncorrect = false; 
+          if( data.valence >  0.6 & data.arousal < -0.6) {
+            action = false;
+            instructioncorrect = true;
+          }
+        }
+      } 
+      tr_4.push(training4)
+      tr_4.push(conditional_error)
+    /* finally, add the entirety of this introductory section to a loop node ... */
+    var tr_loop_4 = {
+      timeline: tr_4,
+      loop_function: function(data) {return !instructioncorrect }
+    }
+    trainingTimeline.push(tr_loop_4) // ... and add that to the timeline
+
+    var tr_5 = []
+    var training5 = { type: jsPsychBKKSurveyText, 
+        data: {trialCategory: "training"},
+        preamble: '<center><img src="./img/angry.jpg"></img></center><p> This image is of someone feeling angry and aggressive. These kinds of feelings belong in the top left corner of the graph. They are very high energy (top), and very negative (right). Click in the top left corner of the graph, and then click submit.</p>', 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: trial_time_lower_limit,
+        circ_hide: false,
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: [],
+      on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 1000)},
+      on_finish: function(data) {
+        console.log(data.valence, data.arousal)
+          instructioncorrect = false; 
+          if( data.valence <  -0.6 & data.arousal > 0.6) {
+            action = false;
+            instructioncorrect = true;
+          }
+        }
+      } 
+      tr_5.push(training5)
+      tr_5.push(conditional_error)
+    /* finally, add the entirety of this introductory section to a loop node ... */
+    var tr_loop_5 = {
+      timeline: tr_5,
+      loop_function: function(data) {return !instructioncorrect }
+    }
+    trainingTimeline.push(tr_loop_5) // ... and add that to the timeline
+
+
+    var tr_6 = []
+    var training6 = { type: jsPsychBKKSurveyText, 
+        data: {trialCategory: "training"},
+        preamble: '<center><img src="./img/ambiguous.jpg"></img></center><p> Many feelings are in-between these extremes. You can use anywhere on the graph to record your feelings, closer to the middle or to the edges depending on how you feel. How does this image make you feel? Click on the graph to record how it makes you feel, then click submit</p>', 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: trial_time_lower_limit,
+        circ_hide: false,
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: [],
+      on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 1000)},
+      on_finish: function(data) {
+        console.log(data.valence, data.arousal)
+          instructioncorrect = true; 
+        }
+      } 
+      tr_6.push(training6)
+      tr_6.push(conditional_error)
+    /* finally, add the entirety of this introductory section to a loop node ... */
+    var tr_loop_6 = {
+      timeline: tr_6,
+      loop_function: function(data) {return !instructioncorrect }
+    }
+    trainingTimeline.push(tr_loop_6) // ... and add that to the timeline
+
+
+
+    var finishTraining = {
+        type: jsPsychHtmlButtonResponse,
+        data: {trialCategory: "training"},
+        stimulus: '<p>Thanks, The next pages will show images. Record how these images make you feel in the way you have been guided </p>' , 
+        choices: ["continue"]
+    }
+    trainingTimeline.push(finishTraining)
+
+
+    var trainingBlock = {
+      timeline: trainingTimeline,
+    }
+
+    if(!excludeIntro){
+      timeline.push(trainingBlock)
+    }
+
+
+
+//  BKK  calibration --------------------------------------------------------------------------------------------------
+var htmlpre = '<center><img src="'
+var htmlpost = '"></img></center><p> <p>Reflect on how this picture makes you feel, then record this on the graph</p>'
+
+ var teststim = { type: jsPsychBKKSurveyText, 
+        data: {trialCategory: jsPsych.timelineVariable("cat"), trialID: jsPsych.timelineVariable("stimName") },
+        preamble: function(){
+          var html=jsPsych.timelineVariable('img')
+          return html
+        }, 
+        // For testing you can turn this off so you don't need to click the cirucmplex each time
+        circClick_required: true, 
+        //  For testing set this to zero so you don't need to wait
+        min_duration: trial_time_lower_limit,
+        circ_hide: false,
+        draw_bkk: false, // HIDING BKK FOR THESE INTRODUCITON TRIALS
+        gui_show:false, 
+        questions: []
+      }
+
+    var bkkCalibrationBlock = {
+      timeline: [teststim],
+      timeline_variables: [ {img: htmlpre + "./img/kk.jpg" + htmlpost, cat: "calibration", stimName:"kiki"},
+                            {img: htmlpre + "./img/bb.jpg" + htmlpost, cat: "calibration", stimName:"bouba"}
+                          ],
+      randomize_order: true
+    }
+
+    if(!excludeIntro){
+      timeline.push(bkkCalibrationBlock)
+    }
+
+//  END PREPARATION  --------------------------------------------------------------------------------------------------
+    var finishPrep = {
+        type: jsPsychHtmlButtonResponse,
+        data: {trialCategory: "training"},
+        stimulus: '<p>Thanks!</p>' +
+                  '<p>You will now be shown 36 shapes and images. Each time take a few moments to look and reflect before recording how they make you feel. Then click on the graph to record the feeling.</p>' +
+                  '<p>The website limits how quickly you can move through the questions, so you will not be able to save time by clicking quickly and not reflecting. </p>' + 
+                  '<br>', 
+        choices: ["continue"]
+    }
+
+    if(!excludeIntro){
+      timeline.push(finishPrep)
+    }
+
+
+//  EXPERIMENT  -----------------------------------------------------------------------------
+
+
+
+//  BKK STIMULI 
+
+    //  SET THE EXPERIMENT VARIABLES HERE
+    //  Experiment Parameters (all are 0-255)
+    //  you can try out values for parameters using try_out_parameters.html
+    let roundVals = [24, 250] // spikiness or roundness of the BKK [variable name: slider_smooth]
+    let countVals = [79, 225] // number of spikes [variable name: slider_complexity]
+    let noiseVals = [0, 150] // how regular is the BKK (higher = less regular) [variable name: slider_noise]
+    let lengthVals = [120, 250] // length of the protrusions [variable name: slider_spike]
+    let showEyesVals = [false] // false = hide eyes, true = show eyes
+    let drawOutline = true; // true = draw black outline around the shape
+
+
+    let BKK_stim_variables = []
+    for(let rnd of roundVals) {
+      for(let cnt of countVals){
+        for (let ns of noiseVals){
+          for (let ey of showEyesVals){
+            for (let lng of lengthVals){
+              let thisTrial = { eyes: ey, 
+                                complexity: cnt, 
+                                noise: ns,
+                                smooth: rnd,
+                                length: lng
+                              }
+              BKK_stim_variables.push(thisTrial)
+            }
+          }
+        }
+      }
+    }
+
+
+    var bkk_instruction = 'Look at the image below. How does it make you feel? Mark your feeling on the graph below, then click continue.'
+
+    var bkk_stimulus = { type: jsPsychBKKSurveyText, 
+      data: {trialCategory: "bkk stimulus", trialID: "bbkk" },
+      bkkColor:'#D9D9D9', 
+      spike: jsPsych.timelineVariable('length'),
+      complexity: jsPsych.timelineVariable('complexity'), 
+      noise: jsPsych.timelineVariable('noise'), 
+      smooth: jsPsych.timelineVariable('smooth'), 
+      draw_eyes: jsPsych.timelineVariable('eyes'),
+      draw_outline: drawOutline,
+      preamble: bkk_instruction, 
+
+      gui_show: false, 
+      // For testing you can turn this off so you don't need to click the cirucmplex each time
+      circClick_required: force_circumplex_click, 
+
+      min_duration: (trial_time_lower_limit), 
+      circ_hide: false,
+      draw_bkk: true,
+      questions: []
+    } 
+
+    var bkk_sequence = {
+    timeline: [bkk_stimulus],
+    randomize_order: true,
+    timeline_variables: BKK_stim_variables
+    }
+
+    timeline.push(bkk_sequence);    
+
+    var bkk_sequence2 = {
+    timeline: [bkk_stimulus],
+    randomize_order: true,
+    timeline_variables: BKK_stim_variables
+    }
+    timeline.push(bkk_sequence2);    
+
+
+//  OASIS --------------------------------------------------------------------------------------------------
+
+    var oasisBlock = {
+      timeline: [teststim],
+      timeline_variables: [ {img: htmlpre + "./img/fire9.jpg" + htmlpost, cat: "calibration", stimName:"fire9"},
+                            {img: htmlpre + "./img/fireworks2.jpg" + htmlpost, cat: "calibration", stimName:"fireworks2"},
+                            {img: htmlpre + "./img/garbagedump1.jpg" + htmlpost, cat: "calibration", stimName:"garbagedump1"},
+                            {img: htmlpre + "./img/lake16.jpg" + htmlpost, cat: "calibration", stimName:"lake16"}
+                          ],
+      randomize_order: true
+    }
+
+
+    if(!excludeIntro){
+      timeline.push(oasisBlock)
+    }
+
+//  END  -----------------------------------------------------------------------------
+    timeline.push(demog_page)
+    timeline.push(debrief_page)
+
+
+    jsPsych.run(timeline);
+
+
+</script>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- ORDER IS IMPORTANT. THESE MUST ALWAYS COME FIRST, IN THIS ORDER -->
+    <script src="./js/p5/p5.js"></script>
+    <script src="./js/circumplex.js"></script>
+    <script src="./js/bkk.js"></script>
+
+    <!-- Now the JsPsych specific stuff -->
+    <script src="./js/jspsych/jspsych.js"></script>
+    <script src="./js/jspsych/plugin-instructions.js"></script>    
+    <script src="./bkk-plugins/bkk-survey-text.js"></script>
+    <link rel="stylesheet" href="./js/jspsych/jspsych.css"></link>
+    <link rel="stylesheet" href="./bkk.css"></link>
+
+
+
+  </head>
+  <body></body>
+  <script>
+    var timeline=[];
+    var timeline1=[];
+    
+    
+    var jsPsych = initJsPsych({
+      on_finish: function() {
+        jsPsych.data.displayData();
+      }
+    });
+
+    var intro = {
+      type: jsPsychInstructions,
+      pages: ['<p>Welcome to the experiment.</p><p>You will have to create a spirit to fit a description.</p><br><p>Click next to begin.</p>',],
+      show_clickable_nav: true
+    };
+    timeline.push(intro);
+
+    var bkk_preamble = 'Look at the sprite below. How does it make you feel. Mark your feeling on the graph below, then click continue.'
+
+    var bkk_survey = { type: jsPsychBKKSurveyText, 
+      bkkColor:"#D7B27A",spike:127, complexity:127, noise: 127,move: 127, smooth: 127,
+      draw_eyes: false,
+      gui_show:true, circClick_required: true, preamble: bkk_preamble, questions: []}
+
+
+
+    timeline1.push(bkk_survey);
+
+
+    timeline.push.apply(timeline, timeline1);
+
+    
+    jsPsych.run(timeline);
+
+
+</script>
+
+</html>
